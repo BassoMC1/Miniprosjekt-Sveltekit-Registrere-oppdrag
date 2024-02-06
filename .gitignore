@@ -1,0 +1,5 @@
+.env
+node_modules/
+svelte-kit/
+README.md 
+package-lock.json
