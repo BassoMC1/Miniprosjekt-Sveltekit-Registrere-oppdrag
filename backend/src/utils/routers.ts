@@ -1,6 +1,6 @@
 import { Router } from "express";
 import app from "../index";
-import Test from "../routers/test";
+import IT from "../routers/IT";
 
 const routerApi = Router();
 
@@ -10,7 +10,7 @@ export default class Routers {
   }
 
   private apiRoutes() {
-    routerApi.use("/test", new Test().build());
+    routerApi.use("/it", new IT().build());
   }
 
   public Build() {
