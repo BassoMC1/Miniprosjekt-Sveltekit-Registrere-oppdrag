@@ -18,12 +18,14 @@ export default class IT {
     }
 
     private data = async (req: Request, res: Response) => {
-        return res.status(200).send({data: "Hello world!"});
-    }
+        const data = await DatabaseIT.find({}).select('-_id -__v');
+        return res.status(200).send({data});
+    };
+    
 
     private NewOpdrag = async (req: Request, res: Response) => {
         const { Dato, Name, Produkt, Skildring } = req.body;
-        
+
         let problemRecord = await DatabaseITProbemId.findOne({});
         if (!problemRecord) {
             problemRecord = new DatabaseITProbemId({id: 1});
@@ -31,16 +33,15 @@ export default class IT {
         }
     
         console.log(problemRecord.id);
-        const d = new Date();
         await new DatabaseIT({
             ID: problemRecord.id,
-            Dato: d,
+            Dato,
             Name,
             Produkt,
             Skildring
         }).save();
     
-        res.status(200).send({data: "id " + problemRecord.id + Dato + Name + Produkt + Skildring});
+        res.status(200).send({data: `Just made a new problem with id ${problemRecord.id}`});
         problemRecord.id++;
         await problemRecord.save();
         return
