@@ -1,19 +1,32 @@
 <script>
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
-  
+
     /**
      * @type {any[]}
      */
     let data = [];
     const message = writable('');
+
+    /**
+     * @type {any}
+     */
+    let totalTasks;
   
     async function fetchData() {
       try {
         const response = await fetch('http://localhost:3000/api/it');
         if (response.ok) {
           const result = await response.json();
-          data = result.data;
+          // @ts-ignore
+          result.data.sort((a, b) => {
+          // @ts-ignore
+          return new Date(a.Dato) - new Date(b.Dato);
+        });
+        data = result.data;
+        calculateCounts();
+        totalTasks = data.length
+        console.log(data)
         } else {
           message.set('Failed to fetch data.');
         }
@@ -95,6 +108,31 @@
         message.set('Unknown error while submitting form.');
       }
     }
+
+
+
+    let counts = {
+    PC: 0,
+    MAC: 0,
+    Nettbrett: 0,
+  };
+
+  // Calculate the counts from the data
+  // @ts-ignore
+  function calculateCounts() {
+    counts = {
+    PC: 0,
+    MAC: 0,
+    Nettbrett: 0,
+    };
+    data.forEach((item) => {
+      if (counts.hasOwnProperty(item.Produkt)) {
+        // @ts-ignore
+        counts[item.Produkt] += 1;
+      }
+    });
+  }
+
   </script>
   
   <style>
@@ -140,6 +178,38 @@
     .removedata-btn {
       background-color: #f44336; /* Red background for contrast */
     }
+
+    .bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+    .chart-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 200px; /* Adjust as needed */
+    border: 1px solid #ccc;
+    margin: 16px;
+  }
+
+  .bar {
+    width: 50px; /* Adjust as needed */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin: 0 10px; /* Adjust as needed */
+    text-align: center;
+    background-color: #4CAF50;
+    transition: height 0.3s ease;
+  }
+
+  .label {
+    writing-mode: tb-rl;
+    transform: rotate(-180deg);
+  }
+  
   
     /* Additional styling can go here */
   </style>
@@ -198,3 +268,12 @@
 
 <button type="submit">Send inn</button>
 </form>
+
+
+<div class="chart-container">
+  {#each Object.entries(counts) as [product, count]}
+    <div class="bar" style="height: {count / totalTasks * 100}%;">
+      <span class="label">{product} ({count})</span>
+    </div>
+  {/each}
+</div>
